@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaninhoppet - Hoppa Hopprep</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0fdf4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: manipulation;
+        }
+        canvas {
+            background-color: #86efac; /* Grön äng */
+            border: 8px solid #166534;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            max-width: 100%;
+            max-height: 80vh;
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            text-align: center;
+            pointer-events: none;
+            width: 100%;
+        }
+        .message-box {
+            position: absolute;
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            display: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <h1 class="text-4xl font-bold text-green-800 drop-shadow-sm">Kaninhoppet</h1>
+        <p class="text-xl text-green-700">Poäng: <span id="score">0</span></p>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="gameOver" class="message-box">
+        <h2 class="text-3xl font-bold text-red-600 mb-4">Ajdå! Repet fastnade!</h2>
+        <p class="text-lg mb-4">Du fick <span id="finalScore">0</span> poäng.</p>
+        <button onclick="resetGame()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full transition-colors">
+            Försök igen
+        </button>
+    </div>
+
+    <div id="startScreen" class="message-box" style="display: block;">
+        <h2 class="text-3xl font-bold text-green-800 mb-4">Välkommen!</h2>
+        <p class="text-lg mb-6 text-gray-700">Tryck på <b>Mellanslag</b> eller <b>Klicka</b> för att hoppa över repet.</p>
+        <button onclick="startGame()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full transition-colors">
+            Starta spelet
+        </button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const finalScoreElement = document.getElementById('finalScore');
+        const gameOverScreen = document.getElementById('gameOver');
+        const startScreen = document.getElementById('startScreen');
+
+        // Spelinställningar
+        canvas.width = 600;
+        canvas.height = 400;
+
+        let score = 0;
+        let gameActive = false;
+        let animationId;
+
+        // Karaktärernas egenskaper
+        const rabbit = {
+            x: canvas.width / 2, 
+            y: canvas.height - 50,
+            vy: 0,
+            gravity: 0.6,
+            jumpStrength: -12,
+            isJumping: false,
+            emoji: "🐰"
+        };
+
+        const monkey = {
+            x: -50,
+            targetX: canvas.width / 2 - 70,
+            y: canvas.height - 50,
+            vy: 0,
+            gravity: 0.6,
+            jumpStrength: -12,
+            isJumping: false,
+            emoji: "🐒",
+            isVisible: false
+        };
+
+        const crocodile = {
+            x: canvas.width + 50,
+            targetX: canvas.width / 2 + 70,
+            y: canvas.height - 50,
+            vy: 0,
+            gravity: 0.6,
+            jumpStrength: -12,
+            isJumping: false,
+            emoji: "🐊",
+            isVisible: false
+        };
+
+        // Hopprepets egenskaper
+        const rope = {
+            angle: 0,
+            speed: 0.05,
+            radiusX: 160, // Ännu bredare för tre djur
+            radiusY: 150,
+            centerX: canvas.width / 2,
+            centerY: canvas.height - 50
+        };
+
+        function drawCharacters() {
+            ctx.font = "50px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            
+            ctx.fillText(rabbit.emoji, rabbit.x, rabbit.y);
+            
+            if (monkey.isVisible) {
+                ctx.fillText(monkey.emoji, monkey.x, monkey.y);
+            }
+
+            if (crocodile.isVisible) {
+                ctx.fillText(crocodile.emoji, crocodile.x, crocodile.y);
+            }
+        }
+
+        function drawRope() {
+            const currentY = rope.centerY + Math.sin(rope.angle) * rope.radiusY;
+            
+            ctx.beginPath();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#4b2c20";
+            
+            ctx.moveTo(rope.centerX - rope.radiusX, rope.centerY);
+            ctx.quadraticCurveTo(rope.centerX, currentY, rope.centerX + rope.radiusX, rope.centerY);
+            ctx.stroke();
+
+            // Kollisionsdetektering
+            const ropeAtBottom = Math.sin(rope.angle) > 0.85; 
+            const rabbitOnGround = rabbit.y > canvas.height - 70;
+            const monkeyOnGround = monkey.y > canvas.height - 70;
+            const crocodileOnGround = crocodile.y > canvas.height - 70;
+
+            if (gameActive && ropeAtBottom) {
+                if (rabbitOnGround) endGame();
+                if (monkey.isVisible && monkey.x >= monkey.targetX - 5 && monkeyOnGround) endGame();
+                if (crocodile.isVisible && crocodile.x <= crocodile.targetX + 5 && crocodileOnGround) endGame();
+            }
+
+            // Poäng och trigga nya djur
+            if (rope.angle > Math.PI * 1.5 && rope.angle < Math.PI * 1.5 + rope.speed) {
+                if (gameActive) {
+                    score++;
+                    scoreElement.innerText = score;
+                    rope.speed += 0.0015;
+
+                    if (score >= 4 && !monkey.isVisible) {
+                        monkey.isVisible = true;
+                    }
+                    if (score >= 8 && !crocodile.isVisible) {
+                        crocodile.isVisible = true;
+                    }
+                }
+            }
+        }
+
+        function updateCharacter(char, isAutoHopp) {
+            char.vy += char.gravity;
+            char.y += char.vy;
+            if (char.y > canvas.height - 50) {
+                char.y = canvas.height - 50;
+                char.vy = 0;
+                char.isJumping = false;
+            }
+
+            if (isAutoHopp && rabbit.isJumping && !char.isJumping) {
+                char.vy = char.jumpStrength;
+                char.isJumping = true;
+            }
+        }
+
+        function update() {
+            if (!gameActive) return;
+
+            // Uppdatera kaninen
+            updateCharacter(rabbit, false);
+
+            // Uppdatera apan
+            if (monkey.isVisible) {
+                if (monkey.x < monkey.targetX) monkey.x += 2;
+                updateCharacter(monkey, true);
+            }
+
+            // Uppdatera krokodilen
+            if (crocodile.isVisible) {
+                if (crocodile.x > crocodile.targetX) crocodile.x -= 2;
+                updateCharacter(crocodile, true);
+            }
+
+            rope.angle += rope.speed;
+            if (rope.angle > Math.PI * 2) {
+                rope.angle = 0;
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#4ade80";
+            ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
+
+            drawRope();
+            drawCharacters();
+            update();
+            animationId = requestAnimationFrame(draw);
+        }
+
+        function jump() {
+            if (!rabbit.isJumping && gameActive) {
+                rabbit.vy = rabbit.jumpStrength;
+                rabbit.isJumping = true;
+            }
+        }
+
+        function startGame() {
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            score = 0;
+            scoreElement.innerText = score;
+            rope.speed = 0.05;
+            rope.angle = 0;
+            
+            monkey.isVisible = false;
+            monkey.x = -50;
+            
+            crocodile.isVisible = false;
+            crocodile.x = canvas.width + 50;
+            
+            gameActive = true;
+            if (!animationId) draw();
+        }
+
+        function endGame() {
+            gameActive = false;
+            finalScoreElement.innerText = score;
+            gameOverScreen.style.display = 'block';
+        }
+
+        function resetGame() {
+            rabbit.y = canvas.height - 50;
+            rabbit.vy = 0;
+            monkey.y = canvas.height - 50;
+            monkey.vy = 0;
+            crocodile.y = canvas.height - 50;
+            crocodile.vy = 0;
+            startGame();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                jump();
+                e.preventDefault();
+            }
+        });
+
+        canvas.addEventListener('mousedown', jump);
+        canvas.addEventListener('touchstart', (e) => {
+            jump();
+            e.preventDefault();
+        }, { passive: false });
+
+        draw();
+    </script>
+</body>
+</html>
