@@ -1,1 +1,244 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adrianna Pawlowska - CV & Portfolio</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #e67e22;
+            --text-color: #333;
+            --light-bg: #f4f7f6;
+            --white: #ffffff;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: var(--white);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            letter-spacing: 1px;
+        }
+
+        .contact-info {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 0.9em;
+        }
+
+        .contact-info span {
+            display: flex;
+            align-items: center;
+        }
+
+        main {
+            padding: 40px;
+        }
+
+        section {
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 5px;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .intro-text {
+            font-style: italic;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            main {
+                padding: 20px;
+            }
+        }
+
+        .course-list {
+            list-style-type: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+        }
+
+        .course-list li::before {
+            content: "•";
+            color: var(--accent-color);
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+        }
+
+        .education-item, .work-item {
+            margin-bottom: 15px;
+        }
+
+        .date {
+            font-weight: bold;
+            color: var(--accent-color);
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .institution {
+            font-weight: 600;
+            display: block;
+        }
+
+        .languages p {
+            margin: 5px 0;
+        }
+
+        .reference-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid var(--primary-color);
+            margin-top: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8em;
+            color: #777;
+            background: #eee;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Adrianna Pawlowska</h1>
+        <div class="contact-info">
+            <span>📍 Eriksfältsgatan 67A, Malmö</span>
+            <span>📞 0707 – 58 01 68</span>
+            <span>✉️ adrianna.paw3@gmail.com</span>
+        </div>
+    </header>
+
+    <main>
+        <section>
+            <h2>Om mig</h2>
+            <p class="intro-text">
+                Jag är en 18-årig tjej som studerar tredje året på Handelsprogrammet på Praktiska Gymnasiet Malmö City. 
+                Jag är praktiskt lagd och älskar försäljning och kundkontakt. Mitt mål är att arbeta i butik med sikte på 
+                att i framtiden bli butikschef eller vidareutbilda mig.
+            </p>
+        </section>
+
+        <div class="grid-container">
+            <section>
+                <h2>Utbildning</h2>
+                <div class="education-item">
+                    <span class="date">2023 - 2026</span>
+                    <span class="institution">Handelsprogrammet (Årskurs 3)</span>
+                    <span>Praktiska Gymnasiet Malmö City</span>
+                </div>
+            </section>
+
+            <section>
+                <h2>Språkkunskaper</h2>
+                <div class="languages">
+                    <p><strong>Svenska:</strong> Flytande</p>
+                    <p><strong>Engelska:</strong> Konversationsnivå</p>
+                    <p><strong>Polska:</strong> Konversationsnivå</p>
+                </div>
+            </section>
+        </div>
+
+        <section>
+            <h2>Lästa kurser</h2>
+            <ul class="course-list">
+                <li>Näthandel</li>
+                <li>Inköp</li>
+                <li>Hållbar utveckling</li>
+                <li>Affärsutveckling</li>
+                <li>Information & Kommunikation</li>
+                <li>Personlig Försäljning</li>
+                <li>Branschkunskap</li>
+                <li>Praktisk Marknadsföring</li>
+                <li>Servicekunskap</li>
+                <li>Handel - specialisering</li>
+                <li>Entreprenörskap</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Arbetslivserfarenhet / APL</h2>
+            <div class="work-item">
+                <span class="date">2024 - 2025</span>
+                <span class="institution">Pressbyrån Södervärn, Malmö</span>
+                <p>Praktik inom handel och kundservice.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Referenser</h2>
+            <div class="grid-container">
+                <div class="reference-card">
+                    <strong>Sava Surla</strong><br>
+                    Yrkeslärare Handel<br>
+                    📞 0708 - 73 08 04
+                </div>
+                <div class="reference-card">
+                    <strong>Damir Ravnjak</strong><br>
+                    Handledare, Pressbyrån<br>
+                    📞 0707 – 97 91 25
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2024 Adrianna Pawlowska
+    </footer>
+</div>
+
+</body>
+</html>
